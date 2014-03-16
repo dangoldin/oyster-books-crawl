@@ -38,10 +38,23 @@ def flatten_dict(d, s =''):
                 new[key] = v
     return new
 
+def remove_dups(li, key_getter):
+    seen = set()
+    fin = []
+    for l in li:
+        k = key_getter(l)
+        if k not in seen:
+            fin.append(l)
+            seen.add(k)
+    return fin
+
 def to_csv(json_file):
     with open(json_file, 'r') as f:
         j = json.loads(f.read())
         jf = [flatten_dict(x) for x in j]
+        # Remove dups
+        jf = remove_dups(jf, lambda x: x['book_isbn'] )
+        print 'Writing %d books to file' % len(jf)
         with open( json_file.replace('.json', '.csv'), 'w') as g:
             writer = csv.DictWriter(g, fieldnames=jf[0].keys())
             writer.writeheader()
